@@ -4,20 +4,13 @@
 const CONTRACT_DRESSING_ROOM = 76
 
 module.exports = function zCostumeEx(dispatch) {
-	const Scanner = require('./scanner')
-	Scanner(dispatch)
 	
-	let checkz = false;
 	let player;
-	let inDye = false;
 	let userDefaultAppearance;
 
-	let db = Scanner.db,
-		cid = null,
+	let gameId = null,
 		external = null,
-		inDressup = false,
-		lastTooltip = 0,
-		lastTooltipTime = 0
+		inDressup = false;
 		
 ////////////////////////////////////////
 
@@ -50,80 +43,39 @@ function presetSave() {
 
 ////////////////////////////////////////
 
-let tagged = {};
-let taggedTimeout = null;
-let taggedLock = false;	
-
-try { tagged = require('./tags.json'); }
-catch(e) { tagged = {}; }
-
-function taggedUpdate() {
-	clearTimeout(taggedTimeout);
-	taggedTimeout = setTimeout(taggedSave, 1000);
-}
-
-function taggedSave() {
-	if(taggedLock) {
-		taggedUpdate();
-		return;
-	}
-
-	taggedLock = true;
-	fs.writeFile(path.join(__dirname, 'tags.json'), JSON.stringify(tagged), err => {
-		taggedLock = false;
-	});
-}
-
-////////////////////////////////////////
-
-	dispatch.hook('S_LOGIN', 1, event => {
-		({cid} = event)
+	dispatch.hook('S_LOGIN', 9, event => {
+		gameId = event.gameId
 		player = event.name;
 		inDressup = false
-		inDye = false;
 		if(presets[player] && presets[player].id != 0){
 			external = presets[player];
-			external.id = cid;
+			external.gameId = gameId;
 		}
 	})
 	
-	dispatch.hook('S_GET_USER_LIST', 2, (event) => {
+	dispatch.hook('S_GET_USER_LIST', 11, (event) => {
         for (let index in event.characters) {
             if(presets[event.characters[index].name] && presets[event.characters[index].name].id != 0){
-                event.characters[index].face = presets[event.characters[index].name].face;
-				event.characters[index].hairAdornment = presets[event.characters[index].name].hairAdornment;
-				event.characters[index].mask = presets[event.characters[index].name].mask;
-				event.characters[index].back = presets[event.characters[index].name].back;
-				event.characters[index].weaponSkin = presets[event.characters[index].name].weaponSkin;
-				event.characters[index].unk36 = presets[event.characters[index].name].weaponEnchant;
-				event.characters[index].costume = presets[event.characters[index].name].costume;
-				event.characters[index].unk35 = presets[event.characters[index].name].costumeDye;
+                event.characters[index].styleHead = presets[event.characters[index].name].styleHead;
+                event.characters[index].styleFace = presets[event.characters[index].name].styleFace;
+				event.characters[index].styleBack = presets[event.characters[index].name].styleBack;
+				event.characters[index].styleWeapon = presets[event.characters[index].name].styleWeapon;
+				event.characters[index].weaponEnchant = presets[event.characters[index].name].weaponEnchant;
+				event.characters[index].styleBody = presets[event.characters[index].name].styleBody;
+				event.characters[index].styleFootprint = presets[event.characters[index].name].styleFootprint;
+				event.characters[index].styleBodyDye = presets[event.characters[index].name].styleBodyDye;
             }
         }
         return true;
     });
 
-	dispatch.hook('S_USER_EXTERNAL_CHANGE', 1, event => {
-		if(event.id.equals(cid)) {
+	dispatch.hook('S_USER_EXTERNAL_CHANGE', 4, event => {
+		if(event.gameId.equals(gameId)) {
 				userDefaultAppearance = Object.assign({}, event);
 		if(presets[player] && presets[player].id != 0){
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, external);
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
 			presets[player] = external;
 			presetUpdate();
-			if(external.enable == 0){
-			dispatch.toClient('S_ABNORMALITY_BEGIN', 2, {
-				target: cid,
-				source: cid,
-				id: 7777008,
-				duration: 864000000,
-				unk: 0,
-				stacks: 1,
-				unk2: 0,
-			});
-			}
 			return false;
 		}
 		else{
@@ -135,43 +87,13 @@ function taggedSave() {
 		}
 	})
 	
-	dispatch.hook('S_ABNORMALITY_BEGIN', 2, (event) => {
-		if(presets[player] && presets[player].id != 0 && external.enable == 1 && event.id == 7777008){
-			setTimeout(function(){
-			dispatch.toClient('S_ABNORMALITY_END', 1, {
-				target: cid,
-				id: 7777008,
-			});}, 1000);
-		}
-		//ragnarok fix
-		if(event.id == 10155130){
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, external);
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
-		}
-	});
-	
-	//ragnarok fix
-	dispatch.hook('sAbnormalityEnd', 1, (event) =>{
-		if(event.target.low != cid.low || event.target.high != cid.high || event.target.unsigned != cid.unsigned){
-			return;
-		}
-		if(event.id == 10155130){
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, external);
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
-		}
-	});
-	
 	 // disable Marrow Brooch apearance change - Credits Kourinn
     dispatch.hook('S_UNICAST_TRANSFORM_DATA', 'raw', (code, data) => {
         return false
     })
 	
 	dispatch.hook('cChat', 1, (event) => {
-		if(event.message.includes("dyecommand")){
+		if(event.message.includes("dye1")){
 			var str = event.message;
 			str = str.replace("<FONT>", "");
 			str = str.replace("</FONT>", "");
@@ -181,11 +103,8 @@ function taggedSave() {
 			let g_hex = Math.min(Math.max(Number(str[2]),16),255).toString(16);
 			let b_hex = Math.min(Math.max(Number(str[3]),16),255).toString(16);
 			var color = Number('0x'+z_hex+r_hex+g_hex+b_hex);
-			external.costumeDye = color;
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, external);
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
+			external.styleBodyDye = color;
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
 			presets[player] = external;
 			presetUpdate();
 			return false;
@@ -196,205 +115,69 @@ function taggedSave() {
 			str = str.replace("</FONT>", "");
 			str = str.split(" ");
 			external.weaponEnchant = str[1];
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, external);
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
 			presets[player] = external;
 			presetUpdate();
-			return false;
-		}
-		if(event.message.includes("tag1")){
-			var str = event.message;
-			str = str.replace("<FONT>", "");
-			str = str.replace("</FONT>", "");
-			str = str.split(" ");
-			tagged[player] = str[1];
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
-			taggedUpdate();
 			return false;
 		}
 		if(event.message.includes("undye1")){
-			external.costumeDye = 0;
+			external.styleBodyDye = 0;
 			presets[player] = external;
 			presetUpdate();
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, external);
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
 			return false;
 		}
-		if(event.message.includes("manual1")){
+		if(event.message.includes("use1")){
 			var str = event.message;
 			str = str.replace("<FONT>", "");
 			str = str.replace("</FONT>", "");
 			str = str.split(" ");
 			if(str[1] == "weapon"){
-				external.weaponSkin = str[2];
+				external.styleWeapon = str[2];
 			}
 			if(str[1] == "costume"){
-				external.costume = str[2];
+				external.styleBody = str[2];
+			}
+			if(str[1] == "head"){
+				external.styleHead = str[2];
+			}
+			if(str[1] == "face"){
+				external.styleFace = str[2];
 			}
 			if(str[1] == "back"){
-				external.back = str[2];
+				external.styleBack = str[2];
 			}
-			if(str[1] == "mask"){
-				external.mask = str[2];
-			}
-			if(str[1] == "hair"){
-				external.hairAdornment = str[2];
-			}
-			if(str[1] == "innerwear"){
-				external.innerwear = str[2];
+			if(str[1] == "footstep"){
+				external.styleFootprint = str[2];
 			}
 			
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, external);
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
 			presets[player] = external;
 			presetUpdate();
-			return false;
-		}
-		if(event.message.includes("dye1")){
-			dispatch.toClient('S_REQUEST_CONTRACT', 1, {
-				senderId: cid,
-				recipientId: 0,
-				type: 42,
-				id: 999999,
-				unk3: 0,
-				time: 0,
-				senderName: player,
-				recipientName: '',
-				data: '',});
-			dispatch.toClient('S_ITEM_COLORING_BAG', 1, {
-				unk: 40,
-				unk1: 593153247,
-				unk2: 0,
-				item: external.costume,
-				unk3: 0,
-				dye: 169087,
-				unk4: 0,
-			unk5: 0,});
-			return false;
-		}
-		if(event.message.includes("undies1")){
-			if(external.enable == 1){
-			dispatch.toClient('S_ABNORMALITY_BEGIN', 2, {
-				target: cid,
-				source: cid,
-				id: 7777008,
-				duration: 864000000,
-				unk: 0,
-				stacks: 1,
-				unk2: 0,
-			});
-			external.enable = 0;
-			presets[player] = external;
-			presetUpdate();
-			}
-			else if(external.enable == 0){
-			dispatch.toClient('S_ABNORMALITY_END', 1, {
-				target: cid,
-				id: 7777008,
-			});
-			external.enable = 1;
-			presets[player] = external;
-			presetUpdate();
-			}
 			return false;
 		}
 		if(event.message.includes("reset1")){
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, userDefaultAppearance);
-			tagged[player] = "";
-			taggedUpdate();
-			dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, userDefaultAppearance);
 			external = Object.assign({}, userDefaultAppearance);
 			presets[player].id = 0;
 			presetUpdate();
 			return false;
 		}
 	});
-	
-	dispatch.hook('C_ITEM_COLORING_SET_COLOR', 1, (event) => {
-		var color = Number('0x'+event.alpha.toString(16)+event.red.toString(16)+event.green.toString(16)+event.blue.toString(16));
-		external.costumeDye = color;
-		presets[player] = external;
-		presetUpdate();
-		inDye = true;
-	});
-	
+		
 	dispatch.hook('S_REQUEST_CONTRACT', 1, event => {
 		if(event.type == CONTRACT_DRESSING_ROOM) {
 			inDressup = true
-
-			let items = []
-
-			for(let slot in db)
-				for(let item of db[slot])
-					items.push({
-						unk: 0,
-						item
-					})
-
-			dispatch.toClient('S_REQUEST_INGAMESTORE_PRODUCT_DETAIL', 1, {items})
 		}
 	})
 	
-	dispatch.hook('C_CANCEL_CONTRACT', 1, event => {
-		if(inDye){
-			inDye = false;
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, external);
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
-			presets[player] = external;
-			presetUpdate();
-		}
-	});
-
 	dispatch.hook('S_CANCEL_CONTRACT', 1, event => {
 		if(inDressup) {
 			inDressup = false
-			process.nextTick(() => { dispatch.toClient('S_USER_EXTERNAL_CHANGE', 1, external) })
+			process.nextTick(() => { dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external) })
 			presets[player] = external;
 			presetUpdate();
-			if(tagged[player]){
-				dispatch.toClient('S_ITEM_CUSTOM_STRING', 1, {owner: cid, items: [{item: external.costume, text: tagged[player]}]});
-			}
 		}
 	})
 
-	dispatch.hook('S_REQUEST_INGAMESTORE_PRODUCT_DETAIL', 1, function(){return false;})
-
-	dispatch.hook('C_REQUEST_NONDB_ITEM_INFO', 1, event => {
-		if(inDressup) {
-			let time = Date.now()
-
-			// The only way to tell an item was clicked in the Dressing Room is to watch for this packet twice in a row.
-			// Unequipping is impossible to detect, unfortunately.
-			if(lastTooltip == (lastTooltip = event.item) && time - lastTooltipTime < 10) equipped(event.item)
-
-			lastTooltipTime = time
-
-			dispatch.toClient('S_REPLY_NONDB_ITEM_INFO', 1, {
-				item: event.item,
-				unk: 0
-			})
-			return false
-		}
-	})
-
-	function equipped(item) {
-		external.id = cid;
-		presets[player] = external;
-		presetUpdate();
-		for(let slot in db)
-			if(db[slot].includes(item)) {
-				external[slot] = item
-				break
-			}
-	}
 }
