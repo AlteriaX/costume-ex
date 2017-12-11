@@ -13,7 +13,7 @@ Example - weapon1 15
 ```
 Dye: 
 ```
-Format - dye1 R G B Z
+Format - dye1 R G B (Z - Brightness?)
 
 Example - dye1 255 50 50 10
 
