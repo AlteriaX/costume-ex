@@ -1,6 +1,8 @@
 # costume-ex
 Working but doesn't have as much stuff. I don't even know :shrug:
 
+Get costume IDs from: http://teradatabase.net/us/
+
 # How to use:
 
 Weapon glow: 
