@@ -1,10 +1,31 @@
 # costume-ex
-EDIT: Due to several factors making opcode mapping a pain, I have decided against maintaining this module. For an alternative, PinkiePie is offering a complete version for $15.
+Working but doesn't have as much stuff. I don't even know :shrug:
 
-![Capitalism](https://cdn.discordapp.com/emojis/369683330137980928.png)
+# How to use:
 
+Weapon glow: 
+```
+Format - weapon1 <number here (1-15)>
 
-TERA ultimate costume script.
-Allows you to wear anything you want client-sided through UI selection.
+Example - weapon1 15
+```
+Dye: 
+```
+Format - dye1 R G B Z
 
-For more information, see: https://teraproxy.tumblr.com/scripts
+Example - dye1 255 50 50 10
+
+Type undye1 to remove.
+```
+
+Costumes: 
+```
+Format - use1 <type> <id>
+
+Types - weapon, costume, head, face, back, footstep
+
+Example - use1 costume 185406
+```
+
+Type ``reset1`` to restore your default looks.
+
