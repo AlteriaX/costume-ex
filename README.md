@@ -19,7 +19,6 @@ Example - dye1 255 50 50 10
 
 Type undye1 to remove.
 ```
-
 Costumes: 
 ```
 Format - use1 <type> <id>
@@ -28,6 +27,11 @@ Types - weapon, costume, head, face, back, footstep
 
 Example - use1 costume 185406
 ```
+Tags:
+```
+Format - tag1 <text>
 
+Example - tag1 Elin
+```
 Type ``reset1`` to restore your default looks.
 
