@@ -1,5 +1,5 @@
 # costume-ex
-Working but doesn't have as much stuff. I don't even know :shrug:
+Working but doesn't have as much features. Costumes that you applied stays when teleporting etc.
 
 Get costume IDs from: http://teradatabase.net/us/
 
