@@ -105,6 +105,17 @@ function taggedSave() {
 			}
 			presets[player] = external;
 			presetUpdate();
+			if(external.weaponDye == 1){
+			dispatch.toClient('S_ABNORMALITY_BEGIN', 2, {
+				target: gameId,
+				source: 0,
+				id: 7000027,
+				duration: 0,
+				unk: 0,
+				stacks: 1,
+				unk2: 0,
+			});
+			}
 			return false;
 		}
 		else{
@@ -116,13 +127,43 @@ function taggedSave() {
 		}
 	})
 	
+	dispatch.hook('S_ABNORMALITY_BEGIN', 2, (event) => {
+		if(presets[player] && presets[player].id != 0 && external.weaponDye == 0 && event.id == 7000027){
+			setTimeout(function(){
+			dispatch.toClient('S_ABNORMALITY_END', 1, {
+				target: gameId,
+				id: 7000027,
+			});}, 1000);
+		}
+		//ragnarok fix
+		if(event.id == 10155130){
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
+			if(tagged[player]){
+				dispatch.toClient('S_ITEM_CUSTOM_STRING', 2, { gameId: gameId, customStrings: [{dbid: external.styleBody, string: tagged[player]}]});
+			}
+		}
+	});
+	
+	//ragnarok fix
+	dispatch.hook('S_ABNORMALITY_END', 1, (event) =>{
+		if(event.target.low != gameId.low || event.target.high != gameId.high || event.target.unsigned != gameId.unsigned){
+			return;
+		}
+		if(event.id == 10155130){
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
+			if(tagged[player]){
+				dispatch.toClient('S_ITEM_CUSTOM_STRING', 2, { gameId: gameId, customStrings: [{dbid: external.styleBody, string: tagged[player]}]});
+			}
+		}
+	});
+	
 	 // disable Marrow Brooch apearance change - Credits Kourinn
     dispatch.hook('S_UNICAST_TRANSFORM_DATA', 'raw', (code, data) => {
         return false
     })
 	
 	dispatch.hook('cChat', 1, (event) => {
-		if(event.message.includes("dye1")){
+		if(event.message.includes("dyebody1")){
 			var str = event.message;
 			str = str.replace("<FONT>", "");
 			str = str.replace("</FONT>", "");
@@ -133,6 +174,25 @@ function taggedSave() {
 			let b_hex = Math.min(Math.max(Number(str[3]),16),255).toString(16);
 			var color = Number('0x'+z_hex+r_hex+g_hex+b_hex);
 			external.styleBodyDye = color;
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
+			if(tagged[player]){
+				dispatch.toClient('S_ITEM_CUSTOM_STRING', 2, { gameId: gameId, customStrings: [{dbid: external.styleBody, string: tagged[player]}]});
+			}
+			presets[player] = external;
+			presetUpdate();
+			return false;
+		}
+		if(event.message.includes("dyeinner1")){
+			var str = event.message;
+			str = str.replace("<FONT>", "");
+			str = str.replace("</FONT>", "");
+			str = str.split(" ");
+			let z_hex = Math.min(Math.max(Number(str[4]),1),255).toString(16);
+			let r_hex = Math.min(Math.max(Number(str[1]),16),255).toString(16);
+			let g_hex = Math.min(Math.max(Number(str[2]),16),255).toString(16);
+			let b_hex = Math.min(Math.max(Number(str[3]),16),255).toString(16);
+			var color = Number('0x'+z_hex+r_hex+g_hex+b_hex);
+			external.underwearDye = color;
 			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
 			if(tagged[player]){
 				dispatch.toClient('S_ITEM_CUSTOM_STRING', 2, { gameId: gameId, customStrings: [{dbid: external.styleBody, string: tagged[player]}]});
@@ -169,6 +229,7 @@ function taggedSave() {
 		}
 		if(event.message.includes("undye1")){
 			external.styleBodyDye = 0;
+			external.underwearDye = 0;
 			presets[player] = external;
 			presetUpdate();
 			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
@@ -200,6 +261,9 @@ function taggedSave() {
 			if(str[1] == "footstep"){
 				external.styleFootprint = str[2];
 			}
+			if(str[1] == "innerwear"){
+				external.underwear = str[2];
+			}
 			
 			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
 			if(tagged[player]){
@@ -207,6 +271,32 @@ function taggedSave() {
 			}
 			presets[player] = external;
 			presetUpdate();
+			return false;
+		}
+		if(event.message.includes("pantsu1")){
+			if(external.weaponDye == 0){
+			dispatch.toClient('S_ABNORMALITY_BEGIN', 2, {
+				target: gameId,
+				source: 0,
+				id: 7000027,
+				duration: 0,
+				unk: 0,
+				stacks: 1,
+				unk2: 0,
+			});
+			external.weaponDye = 1;
+			presets[player] = external;
+			presetUpdate();
+			}
+			else if(external.weaponDye == 1){
+			dispatch.toClient('S_ABNORMALITY_END', 1, {
+				target: gameId,
+				id: 7000027,
+			});
+			external.weaponDye = 0;
+			presets[player] = external;
+			presetUpdate();
+			}
 			return false;
 		}
 		if(event.message.includes("reset1")){
