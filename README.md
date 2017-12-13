@@ -13,9 +13,9 @@ Example - weapon1 15
 ```
 Dye: 
 ```
-Format - dye1/dyeinner1 R G B (Z - Brightness?)
+Format - dyebody1/dyeinner1 R G B (Z - Brightness?)
 
-Example - dye1/dyeinner1 255 50 50 10
+Example - dyebody1/dyeinner1 255 50 50 10
 
 Type undye1 to remove.
 ```
