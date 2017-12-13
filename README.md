@@ -13,9 +13,9 @@ Example - weapon1 15
 ```
 Dye: 
 ```
-Format - dye1 R G B (Z - Brightness?)
+Format - dye1/dyeinner1 R G B (Z - Brightness?)
 
-Example - dye1 255 50 50 10
+Example - dye1/dyeinner1 255 50 50 10
 
 Type undye1 to remove.
 ```
@@ -23,7 +23,7 @@ Costumes:
 ```
 Format - use1 <type> <id>
 
-Types - weapon, costume, head, face, back, footstep
+Types - weapon, costume, head, face, back, footstep, innerwear
 
 Example - use1 costume 185406
 ```
@@ -33,5 +33,8 @@ Format - tag1 <text>
 
 Example - tag1 Elin
 ```
-Type ``reset1`` to restore your default looks.
+
+``pantsu1`` - Show your innerwear! >///<
+
+``reset1`` - Restore your default looks.
 
