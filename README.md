@@ -1,40 +1,40 @@
 # costume-ex
-Working but doesn't have as much features. Costumes that you applied stays when teleporting etc.
+Mostly working now. Costumes that you applied stays when teleporting etc.
 
 Get costume IDs from: http://teradatabase.net/us/
 
 # How to use:
+**Command is required now.**
 
 Weapon glow: 
 ```
-Format - weapon1 <number here (1-15)>
+Format - enchant <number here (1-15)>
 
-Example - weapon1 15
+Example - enchant 15
 ```
 Dye: 
 ```
-Format - dyebody1/dyeinner1 R G B (Z - Brightness?)
+Format - dye costume/inner
 
-Example - dyebody1/dyeinner1 255 50 50 10
+Example - dye costume
 
-Type undye1 to remove.
+Type undye to remove.
 ```
 Costumes: 
 ```
-Format - use1 <type> <id>
+Format - use <type> <id>
 
-Types - weapon, costume, head, face, back, footstep, innerwear
+Types - weapon, costume, head, face, back, footstep, inner
 
-Example - use1 costume 185406
+Example - use costume 185406
 ```
 Tags:
 ```
-Format - tag1 <text>
+Format - tag <text>
 
-Example - tag1 Elin
+Example - tag Elin
 ```
 
-``pantsu1`` - Show your innerwear! >///<
+``pantsu`` - Show your innerwear! >///<
 
-``reset1`` - Restore your default looks.
-
+``reset`` - Restore your default looks.
