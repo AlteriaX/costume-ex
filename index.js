@@ -70,7 +70,7 @@ module.exports = function zCostumeEx(dispatch) {
 	}
 	
 	function AppearanceUpdate() {
-		dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
+		dispatch.toClient('S_USER_EXTERNAL_CHANGE', 5, external);
 		if(tagged[player]){
 			dispatch.toClient('S_ITEM_CUSTOM_STRING', 2, { gameId: gameId, customStrings: [{dbid: external.styleBody, string: tagged[player]}]});
 		}
@@ -90,7 +90,7 @@ module.exports = function zCostumeEx(dispatch) {
 		}
 	});
 	
-	dispatch.hook('S_GET_USER_LIST', 11, (event) => {
+	dispatch.hook('S_GET_USER_LIST', 12, (event) => {
         for (let index in event.characters) {
             if(presets[event.characters[index].name] && presets[event.characters[index].name].id != 0){
                 event.characters[index].styleHead = presets[event.characters[index].name].styleHead;
@@ -106,7 +106,7 @@ module.exports = function zCostumeEx(dispatch) {
         return true;
     });
 
-	dispatch.hook('S_USER_EXTERNAL_CHANGE', 4, event => {
+	dispatch.hook('S_USER_EXTERNAL_CHANGE', 5, event => {
 		if(event.gameId.equals(gameId)) {
 				userDefaultAppearance = Object.assign({}, event);
 		if(presets[player] && presets[player].id != 0){
@@ -142,7 +142,7 @@ module.exports = function zCostumeEx(dispatch) {
 		}
 		// Ragnarok Fix
 		if(event.id == 10155130){
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 5, external);
 			if(tagged[player]){
 				dispatch.toClient('S_ITEM_CUSTOM_STRING', 2, { gameId: gameId, customStrings: [{dbid: external.styleBody, string: tagged[player]}]});
 			}
@@ -155,7 +155,7 @@ module.exports = function zCostumeEx(dispatch) {
 			return;
 		}
 		if(event.id == 10155130){
-			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, external);
+			dispatch.toClient('S_USER_EXTERNAL_CHANGE', 5, external);
 			if(tagged[player]){
 				dispatch.toClient('S_ITEM_CUSTOM_STRING', 2, { gameId: gameId, customStrings: [{dbid: external.styleBody, string: tagged[player]}]});
 			}
@@ -312,7 +312,7 @@ module.exports = function zCostumeEx(dispatch) {
 	})
 	
 	command.add('reset', () => {
-		dispatch.toClient('S_USER_EXTERNAL_CHANGE', 4, userDefaultAppearance);
+		dispatch.toClient('S_USER_EXTERNAL_CHANGE', 5, userDefaultAppearance);
 		tagged[player] = "";
 		taggedUpdate();
 		dispatch.toClient('S_ITEM_CUSTOM_STRING', 2, { gameId: gameId, customStrings: [{dbid: external.styleBody, string: tagged[player]}]});
