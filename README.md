@@ -1,7 +1,7 @@
 # costume-ex
 Mostly working now. Costumes that you applied stays when teleporting etc.
 
-Get costume IDs from: http://teradatabase.net/us/
+Get costume IDs from: http://teralore.com/us/
 
 # How to use:
 **Command is required now.**
